@@ -1,24 +1,17 @@
 package article
 
 import (
-	"bilibili/pkg/client"
+	"bilibili/pkg/misc"
 	"fmt"
+	"net/http"
 )
-
-type Article struct {
-	client *client.Client
-}
-
-func New(client *client.Client) *Article {
-	return &Article{client}
-}
 
 // 点赞文章
 //
 // 参数：
 //   - id (int): 文章cvid
 //   - type (int): 1:点赞 2:取消点赞
-func (a *Article) Like(id int, likeType int) (*client.BaseResponse, error) {
+func (a *Article) Like(id int, likeType int) (*misc.BaseResponse, error) {
 
 	formData := map[string]string{
 		"id":   fmt.Sprintf("%d", id),
@@ -26,13 +19,21 @@ func (a *Article) Like(id int, likeType int) (*client.BaseResponse, error) {
 		"csrf": a.client.CSRF,
 	}
 
-	resp := &client.BaseResponse{}
-	err := a.client.FormData(formData).NewRequest("POST", "https://api.bilibili.com/x/article/like").
-		WithSESSDATA().
-		WithContentType("application/x-www-form-urlencoded").
-		Do().Json(resp)
+	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
+		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetCookie(&http.Cookie{
+			Name:  "SESSDATA",
+			Value: a.client.SESSDATA,
+		}).
+		SetResult(&misc.BaseResponse{}).
+		Post("https://api.bilibili.com/x/article/like")
 
-	return resp, err
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Result().(*misc.BaseResponse), nil
 }
 
 // 投币文章
@@ -43,7 +44,8 @@ func (a *Article) Like(id int, likeType int) (*client.BaseResponse, error) {
 //   - multiply (int): 投币数量（上限为2）
 //
 // 备注：
-//   - avtype必须为2
+//   - 必须有 csrf
+//   - 认证方式：Cookie（SESSDATA）
 func (a *Article) Coin(aid, upid, multiply int) (*CoinResponse, error) {
 
 	formData := map[string]string{
@@ -54,51 +56,89 @@ func (a *Article) Coin(aid, upid, multiply int) (*CoinResponse, error) {
 		"csrf":     a.client.CSRF,
 	}
 
-	resp := &CoinResponse{}
-	err := a.client.FormData(formData).NewRequest("POST", "https://api.bilibili.com/x/web-interface/coin/add").
-		WithSESSDATA().
-		WithContentType("application/x-www-form-urlencoded").
-		Do().Json(resp)
+	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
+		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetCookie(&http.Cookie{
+			Name:  "SESSDATA",
+			Value: a.client.SESSDATA,
+		}).
+		SetResult(&CoinResponse{}).
+		Post("https://api.bilibili.com/x/web-interface/coin/add")
 
-	return resp, err
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Result().(*CoinResponse), nil
+
 }
 
 // 收藏文章
 //
 // 参数：
 //   - id (int): 文章cvid
-func (a *Article) Favorite(id int) (*client.BaseResponse, error) {
-
+//
+// 备注：
+//   - 必须有 csrf
+//   - 认证方式：Cookie（SESSDATA）
+func (a *Article) Favorite(id int) (*misc.BaseResponse, error) {
 	formData := map[string]string{
 		"id":   fmt.Sprintf("%d", id),
 		"csrf": a.client.CSRF,
 	}
 
-	resp := &client.BaseResponse{}
-	err := a.client.FormData(formData).NewRequest("POST", "https://api.bilibili.com/x/article/favorites/add").
-		WithSESSDATA().
-		WithContentType("application/x-www-form-urlencoded").
-		Do().Json(resp)
+	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
+		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetCookie(&http.Cookie{
+			Name:  "SESSDATA",
+			Value: a.client.SESSDATA,
+		}).
+		SetResult(&misc.BaseResponse{}).
+		Post("https://api.bilibili.com/x/article/favorites/add")
 
-	return resp, err
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Result().(*misc.BaseResponse), nil
 }
 
-// 收藏文章
+// 取消收藏文章
 //
 // 参数：
 //   - id (int): 文章cvid
-func (a *Article) UnFavorite(id int) (*client.BaseResponse, error) {
-
+//
+// 备注：
+//   - 必须有 csrf
+//   - 认证方式：Cookie（SESSDATA）
+func (a *Article) UnFavorite(id int) (*misc.BaseResponse, error) {
 	formData := map[string]string{
 		"id":   fmt.Sprintf("%d", id),
 		"csrf": a.client.CSRF,
 	}
 
-	resp := &client.BaseResponse{}
-	err := a.client.FormData(formData).NewRequest("POST", "https://api.bilibili.com/x/article/favorites/del").
-		WithSESSDATA().
-		WithContentType("application/x-www-form-urlencoded").
-		Do().Json(resp)
+	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
+		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetCookie(&http.Cookie{
+			Name:  "SESSDATA",
+			Value: a.client.SESSDATA,
+		}).
+		SetResult(&misc.BaseResponse{}).
+		Post("https://api.bilibili.com/x/article/favorites/del")
 
-	return resp, err
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Result().(*misc.BaseResponse), nil
+}
+
+type CoinResponse struct {
+	misc.BaseResponse
+	Data struct {
+		Like bool `json:"like"`
+	} `json:"data"`
 }
