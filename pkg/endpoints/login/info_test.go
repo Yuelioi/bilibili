@@ -1,22 +1,16 @@
 package login
 
 import (
-	"bilibili/pkg/client"
 	"bilibili/tests"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUserKeys(t *testing.T) {
-	tests.LoadEnv()
-	sessdata := os.Getenv("SESSDATA")
-
-	client := client.New()
-	client.SESSDATA = sessdata
-	service := New(client)
+	tc := tests.NewTestClient().WithSessdata()
+	service := New(tc.Client)
 
 	resp, err := service.UserKeys()
 
@@ -25,14 +19,10 @@ func TestUserKeys(t *testing.T) {
 }
 
 func TestSignUrl(t *testing.T) {
-	tests.LoadEnv()
-	sessdata := os.Getenv("SESSDATA")
+	tc := tests.NewTestClient().WithSessdata()
+	service := New(tc.Client)
 
 	urlStr := "https://api.bilibili.com/x/space/wbi/acc/info?mid=1850091"
-
-	client := client.New()
-	client.SESSDATA = sessdata
-	service := New(client)
 
 	var data interface{}
 
@@ -53,12 +43,8 @@ func TestSignUrl(t *testing.T) {
 	assert.NoError(t, err)
 }
 func TestNavUserInfo(t *testing.T) {
-	tests.LoadEnv()
-	sessdata := os.Getenv("SESSDATA")
-
-	client := client.New()
-	client.SESSDATA = sessdata
-	service := New(client)
+	tc := tests.NewTestClient().WithSessdata()
+	service := New(tc.Client)
 
 	resp, err := service.NavUserInfo()
 
@@ -67,12 +53,8 @@ func TestNavUserInfo(t *testing.T) {
 }
 
 func TestUserState(t *testing.T) {
-	tests.LoadEnv()
-	sessdata := os.Getenv("SESSDATA")
-
-	client := client.New()
-	client.SESSDATA = sessdata
-	service := New(client)
+	tc := tests.NewTestClient().WithSessdata()
+	service := New(tc.Client)
 
 	resp, err := service.UserState()
 

@@ -1,10 +1,7 @@
 package audio
 
 import (
-	"bilibili/pkg/client"
 	"bilibili/tests"
-	"os"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,17 +10,8 @@ import (
 const sid = 13598
 
 func TestCollect(t *testing.T) {
-	tests.LoadEnv()
-	sessdata := os.Getenv("SESSDATA")
-	userID := os.Getenv("DedeUserID")
-
-	client := client.New()
-	client.SESSDATA = sessdata
-	uid, err := strconv.Atoi(userID)
-	assert.NoError(t, err)
-
-	client.DedeUserID = uid
-	service := New(client)
+	tc := tests.NewTestClient().WithSessdata().WithDedeUserID()
+	service := New(tc.Client)
 
 	resp, err := service.Collect(sid)
 
@@ -32,17 +20,8 @@ func TestCollect(t *testing.T) {
 }
 
 func TestCoin(t *testing.T) {
-	tests.LoadEnv()
-	sessdata := os.Getenv("SESSDATA")
-	userID := os.Getenv("DedeUserID")
-
-	client := client.New()
-	client.SESSDATA = sessdata
-	uid, err := strconv.Atoi(userID)
-	assert.NoError(t, err)
-
-	client.DedeUserID = uid
-	service := New(client)
+	tc := tests.NewTestClient().WithSessdata().WithDedeUserID()
+	service := New(tc.Client)
 
 	resp, err := service.Coin(sid)
 
@@ -51,19 +30,8 @@ func TestCoin(t *testing.T) {
 }
 
 func TestAddCoin(t *testing.T) {
-	tests.LoadEnv()
-	sessdata := os.Getenv("SESSDATA")
-	userID := os.Getenv("DedeUserID")
-	csrf := os.Getenv("CSRF")
-
-	client := client.New()
-
-	client.SESSDATA = sessdata
-	uid, err := strconv.Atoi(userID)
-	assert.NoError(t, err)
-	client.DedeUserID = uid
-	client.CSRF = csrf
-	service := New(client)
+	tc := tests.NewTestClient().WithSessdata().WithDedeUserID().WithCRSF()
+	service := New(tc.Client)
 
 	resp, err := service.AddCoin(sid, 1)
 

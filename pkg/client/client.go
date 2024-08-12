@@ -9,6 +9,8 @@ type Client struct {
 	DedeUserID int
 	SESSDATA   string
 	CSRF       string
+	AccessKey  string
+	Buvid3     string
 }
 
 func New() *Client {

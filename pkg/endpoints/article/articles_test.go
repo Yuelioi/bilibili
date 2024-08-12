@@ -1,22 +1,15 @@
 package article
 
 import (
-	"bilibili/pkg/client"
 	"bilibili/tests"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestArticles(t *testing.T) {
-	tests.LoadEnv()
-	sessdata := os.Getenv("SESSDATA")
-
-	client := client.New()
-
-	client.SESSDATA = sessdata
-	service := New(client)
+	tc := tests.NewTestClient().WithSessdata()
+	service := New(tc.Client)
 
 	resp, err := service.Articles(rlid)
 
