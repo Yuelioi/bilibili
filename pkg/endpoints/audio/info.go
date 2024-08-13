@@ -1,7 +1,6 @@
 package audio
 
 import (
-	"bilibili/tools"
 	"fmt"
 	"net/http"
 )
@@ -16,18 +15,18 @@ import (
 func (a *Audio) SongInfo(sid int) (*SongInfoResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/song/info"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"sid": fmt.Sprintf("%d", sid),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&SongInfoResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -46,14 +45,14 @@ func (a *Audio) SongInfo(sid int) (*SongInfoResponse, error) {
 func (a *Audio) SongTags(sid int) (*SongTagsResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/tag/song"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"sid": fmt.Sprintf("%d", sid),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetResult(&SongTagsResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -72,14 +71,14 @@ func (a *Audio) SongTags(sid int) (*SongTagsResponse, error) {
 func (a *Audio) SongMembers(sid int) (*SongMembersResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/member/song"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"sid": fmt.Sprintf("%d", sid),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetResult(&SongMembersResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -98,14 +97,14 @@ func (a *Audio) SongMembers(sid int) (*SongMembersResponse, error) {
 func (a *Audio) SongLyric(sid int) (*SongLyricResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/song/lyric"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"sid": fmt.Sprintf("%d", sid),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetResult(&SongLyricResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err

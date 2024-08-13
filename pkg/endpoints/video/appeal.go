@@ -4,11 +4,11 @@ import (
 	"net/http"
 )
 
-// GetAppealTags retrieves the list of available appeal types.
+// 获取投诉类型
 //
 // Authentication:
 //   - 认证方式：Cookie（SESSDATA）
-func (a *Video) GetAppealTags() (*AppealTagsResponse, error) {
+func (a *Video) AppealTags() (*AppealTagsResponse, error) {
 	baseURL := "https://api.bilibili.com/x/web-interface/archive/appeal/tags"
 
 	resp, err := a.client.HTTPClient.R().
@@ -26,7 +26,7 @@ func (a *Video) GetAppealTags() (*AppealTagsResponse, error) {
 	return resp.Result().(*AppealTagsResponse), nil
 }
 
-// SubmitAppeal submits a complaint about a video.
+// 投诉稿件
 //
 // Parameters:
 //   - aid (int): 视频的aid

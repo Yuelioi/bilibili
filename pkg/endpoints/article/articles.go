@@ -2,7 +2,6 @@ package article
 
 import (
 	"bilibili/pkg/misc"
-	"bilibili/tools"
 	"fmt"
 	"net/http"
 )
@@ -17,19 +16,19 @@ import (
 func (a *Article) Articles(id int) (*ArticlesResponseData, error) {
 	baseURL := "https://api.bilibili.com/x/article/list/web/articles"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"id": fmt.Sprintf("%d", id),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
 		SetHeader("Content-Type", "application/json").
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&ArticlesResponseData{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err

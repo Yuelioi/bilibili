@@ -1,7 +1,6 @@
 package video
 
 import (
-	"bilibili/tools"
 	"fmt"
 	"net/http"
 )
@@ -17,30 +16,43 @@ import (
 // 备注：
 //   - 认证方式：仅可Cookie（SESSDATA）
 //   - 需验证 Cookie 中 buvid3 字段存在且正常，否则将触发风控
-func (v *Video) Like(aid int, bvid string, like int, csrf string) (*LikeResponse, error) {
+func (v *Video) Like(aid int, bvid string, like int) (*LikeResponse, error) {
 	baseURL := "https://api.bilibili.com/x/web-interface/archive/like"
 
+	// 检查buvid3是否存在
+	if v.client.Buvid3 == "" {
+		return nil, fmt.Errorf("buvid3 is required but not provided")
+	}
+
+	// 构建表单数据
 	formData := map[string]string{
 		"aid":  fmt.Sprintf("%d", aid),
 		"bvid": bvid,
 		"like": fmt.Sprintf("%d", like),
-		"csrf": csrf,
+		"csrf": v.client.CSRF,
 	}
 
 	resp, err := v.client.HTTPClient.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
 		SetFormData(formData).
-		SetCookie(&http.Cookie{
-			Name:  "SESSDATA",
-			Value: v.client.SESSDATA,
-		}).
+		SetCookies([]*http.Cookie{
+			&http.Cookie{
+				Name:  "SESSDATA",
+				Value: v.client.SESSDATA},
+			&http.Cookie{
+				Name:  "buvid3",
+				Value: fmt.Sprint(v.client.Buvid3)}}).
 		SetResult(&LikeResponse{}).
 		Post(baseURL)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
+	// 检查响应状态码
+	if resp.IsError() {
+		return nil, fmt.Errorf("request failed with status: %s", resp.Status())
+	}
 	return resp.Result().(*LikeResponse), nil
 }
 
@@ -53,11 +65,11 @@ func (v *Video) Like(aid int, bvid string, like int, csrf string) (*LikeResponse
 //
 // 备注：
 //   - 认证方式：仅可APP
-func (v *Video) AppLike(accessKey string, aid int, like int) (*AppLikeResponse, error) {
+func (v *Video) LikeApp(aid int, like int) (*AppLikeResponse, error) {
 	url := "https://app.bilibili.com/x/v2/view/like"
 
 	formData := map[string]string{
-		"access_key": accessKey,
+		"access_key": v.client.AccessKey,
 		"aid":        fmt.Sprintf("%d", aid),
 		"like":       fmt.Sprintf("%d", like),
 	}
@@ -75,7 +87,7 @@ func (v *Video) AppLike(accessKey string, aid int, like int) (*AppLikeResponse, 
 	return resp.Result().(*AppLikeResponse), nil
 }
 
-// 判断视频近期是否被点赞
+// 判断视频近期是否被点赞(双端) 没有作用
 //
 // 参数：
 //   - aid (int, optional): 稿件 avid，和 bvid 二选一
@@ -85,24 +97,28 @@ func (v *Video) AppLike(accessKey string, aid int, like int) (*AppLikeResponse, 
 // 备注：
 //   - 认证方式：APP 或 Cookie（SESSDATA）
 //   - 该 API 仅能判断视频在近期是否被点赞，不能判断视频是否被点赞。近期的定义不明，但至少半年前点赞的视频，获取到的结果会是0。
-func (v *Video) HasLike(aid int, bvid string, accessKey string) (*HasLikeResponse, error) {
+//
+// Deprecated: Use NewFunction instead.
+func (v *Video) HasLike(aid int, bvid string) (*HasLikeResponse, error) {
 	baseURL := "https://api.bilibili.com/x/web-interface/archive/has/like"
 
-	params := map[string]string{
-		"aid":        fmt.Sprintf("%d", aid),
-		"bvid":       bvid,
-		"access_key": accessKey,
+	formData := map[string]string{
+		"aid":  fmt.Sprintf("%d", aid),
+		"bvid": bvid,
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
+
+	if v.client.AccessKey != "" {
+		formData["access_key"] = v.client.AccessKey
+	}
 
 	resp, err := v.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: v.client.SESSDATA,
 		}).
-		SetHeader("Authorization", fmt.Sprintf("Bearer %s", accessKey)).
 		SetResult(&HasLikeResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -119,20 +135,20 @@ func (v *Video) HasLike(aid int, bvid string, accessKey string) (*HasLikeRespons
 //
 // Authentication:
 //   - 认证方式：仅可App，使用access_key进行认证
-func (a *Video) Dislike(aid int, dislike int) (*DislikeResponse, error) {
+func (v *Video) DislikeApp(aid int, dislike int) (*DislikeResponse, error) {
 	baseURL := "https://app.biliapi.net/x/v2/view/dislike"
 
-	params := map[string]string{
-		"access_key": a.client.AccessKey,
+	formData := map[string]string{
+		"access_key": v.client.AccessKey,
 		"aid":        fmt.Sprintf("%d", aid),
 		"dislike":    fmt.Sprintf("%d", dislike),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
-	resp, err := a.client.HTTPClient.R().
+	resp, err := v.client.HTTPClient.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetFormData(formData).
 		SetResult(&DislikeResponse{}).
-		Post(fullURL)
+		Post(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -141,7 +157,7 @@ func (a *Video) Dislike(aid int, dislike int) (*DislikeResponse, error) {
 	return resp.Result().(*DislikeResponse), nil
 }
 
-// Coin sends a request to add coins to a video.
+// 投币视频（web端）
 //
 // Parameters:
 //   - aid (int): 稿件avid, 与bvid任选一个
@@ -152,30 +168,34 @@ func (a *Video) Dislike(aid int, dislike int) (*DislikeResponse, error) {
 //
 // Authentication:
 //   - 认证方式：仅可Cookie，使用SESSDATA进行认证
-func (a *Video) Coin(aid int, bvid string, multiply int, selectLike int, csrf string) (*CoinResponse, error) {
+func (v *Video) Coin(aid int, bvid string, multiply int, selectLike int) (*CoinResponse, error) {
 	baseURL := "https://api.bilibili.com/x/web-interface/coin/add"
 
-	params := map[string]string{
+	// 检查buvid3是否存在
+	if v.client.Buvid3 == "" {
+		return nil, fmt.Errorf("buvid3 is required but not provided")
+	}
+
+	formData := map[string]string{
 		"aid":         fmt.Sprintf("%d", aid),
 		"bvid":        bvid,
 		"multiply":    fmt.Sprintf("%d", multiply),
 		"select_like": fmt.Sprintf("%d", selectLike),
-		"csrf":        csrf,
+		"csrf":        v.client.CSRF,
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
-	resp, err := a.client.HTTPClient.R().
-		SetCookie(&http.Cookie{
-			Name:  "SESSDATA",
-			Value: a.client.SESSDATA,
-		}).
-		SetCookie(&http.Cookie{
-			Name:  "buvid3",
-			Value: a.client.Buvid3,
-		}).
+	resp, err := v.client.HTTPClient.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetFormData(formData).
+		SetCookies([]*http.Cookie{
+			{
+				Name:  "SESSDATA",
+				Value: v.client.SESSDATA},
+			{
+				Name:  "buvid3",
+				Value: fmt.Sprint(v.client.Buvid3)}}).
 		SetResult(&CoinResponse{}).
-		Post(fullURL)
+		Post(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -187,18 +207,17 @@ func (a *Video) Coin(aid int, bvid string, multiply int, selectLike int, csrf st
 // 投币视频（APP端）
 //
 // 参数：
-//   - accessKey (string): APP 登录 Token
 //   - aid (int): 稿件 avid
 //   - multiply (int): 投币数量，上限为2
 //   - selectLike (int): 附加点赞，0表示不点赞，1表示同时点赞，默认为0
 //
 // 备注：
 //   - 认证方式：仅可APP
-func (v *Video) CoinApp(accessKey string, aid int, multiply int, selectLike int) (*CoinAppResponse, error) {
+func (v *Video) CoinApp(aid int, multiply int, selectLike int) (*CoinAppResponse, error) {
 	baseURL := "https://app.biliapi.com/x/v2/view/coin/add"
 
 	formData := map[string]string{
-		"access_key":  accessKey,
+		"access_key":  v.client.AccessKey,
 		"aid":         fmt.Sprintf("%d", aid),
 		"multiply":    fmt.Sprintf("%d", multiply),
 		"select_like": fmt.Sprintf("%d", selectLike),
@@ -220,33 +239,31 @@ func (v *Video) CoinApp(accessKey string, aid int, multiply int, selectLike int)
 // 判断视频是否被投币（双端）
 //
 // 参数：
-//   - accessKey (string): APP 登录 Token (仅用于APP方式)
 //   - aid (int): 稿件 avid，avid 与 bvid 任选一个
 //   - bvid (string): 稿件 bvid，avid 与 bvid 任选一个
 //
 // 备注：
 //   - 认证方式：APP或Cookie（SESSDATA）
-func (v *Video) CoinsStatus(accessKey string, aid int, bvid string) (*CoinsStatusResponse, error) {
+func (v *Video) CoinsStatus(aid int, bvid string) (*CoinsStatusResponse, error) {
 	baseURL := "https://api.bilibili.com/x/web-interface/archive/coins"
 
-	params := map[string]string{}
-	if accessKey != "" {
-		params["access_key"] = accessKey
-	}
-	if aid > 0 {
-		params["aid"] = fmt.Sprintf("%d", aid)
-	}
-	if bvid != "" {
-		params["bvid"] = bvid
+	formData := map[string]string{
+		"aid":  fmt.Sprintf("%d", aid),
+		"bvid": bvid,
 	}
 
-	fullURL := tools.URLWithParams(baseURL, params)
+	if v.client.AccessKey != "" {
+		formData["access_key"] = v.client.AccessKey
+	}
 
 	resp, err := v.client.HTTPClient.R().
-		SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetHeader("Cookie", "SESSDATA="+v.client.SESSDATA).
+		SetCookie(&http.Cookie{
+			Name:  "SESSDATA",
+			Value: v.client.SESSDATA,
+		}).
+		SetQueryParams(formData).
 		SetResult(&CoinsStatusResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -255,50 +272,41 @@ func (v *Video) CoinsStatus(accessKey string, aid int, bvid string) (*CoinsStatu
 	return resp.Result().(*CoinsStatusResponse), nil
 }
 
-// Collect handles the action of collecting or uncollecting a video.
+// 收藏视频（双端）
 //
 // Parameters:
 //   - rid (int): 视频的aid
-//   - type (int): 必须为2
-//   - addMediaIDs (string): 需要加入的收藏夹mlid，多个用逗号分隔（可选）
-//   - delMediaIDs (string): 需要取消的收藏夹mlid，多个用逗号分隔（可选）
+//   - addMediaIDs (string): 需要加入的收藏夹mlid，多个用逗号分隔（2选1）
+//   - delMediaIDs (string): 需要取消的收藏夹mlid，多个用逗号分隔（2选1）
 //
 // Authentication:
 //   - 认证方式：APP或Cookie（SESSDATA），Cookie方式时需要验证referer为.bilibili.com域名下
 //   - 使用access_key进行APP认证
 //   - 使用csrf token进行Cookie认证
-func (a *Video) Collect(rid int, addMediaIDs, delMediaIDs string) (*CollectResponse, error) {
+func (v *Video) Collect(rid int, addMediaIDs, delMediaIDs string) (*CollectResponse, error) {
 	baseURL := "https://api.bilibili.com/medialist/gateway/coll/resource/deal"
 
-	params := map[string]string{
-		"rid":  fmt.Sprintf("%d", rid),
-		"type": "2",
+	formData := map[string]string{
+		"rid":           fmt.Sprintf("%d", rid),
+		"type":          "2",
+		"csrf":          v.client.CSRF,
+		"add_media_ids": addMediaIDs,
+		"del_media_ids": delMediaIDs,
 	}
-	if addMediaIDs != "" {
-		params["add_media_ids"] = addMediaIDs
-	}
-	if delMediaIDs != "" {
-		params["del_media_ids"] = delMediaIDs
-	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
-	req := a.client.HTTPClient.R().
-		SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetResult(&CollectResponse{})
+	if v.client.AccessKey != "" {
+		formData["access_key"] = v.client.AccessKey
+	}
 
-	// Set authentication headers or cookies
-	if a.client.AccessKey != "" {
-		req.SetHeader("Authorization", "Bearer "+a.client.AccessKey)
-	} else if a.client.SESSDATA != "" {
-		req.SetCookie(&http.Cookie{
+	resp, err := v.client.HTTPClient.R().
+		SetFormData(formData).
+		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
-			Value: a.client.SESSDATA,
-		})
-		req.SetHeader("Referer", "https://www.bilibili.com")
-		req.SetHeader("X-CSRF-TOKEN", a.client.CSRF)
-	}
+			Value: v.client.SESSDATA,
+		}).
+		SetHeader("Referer", "https://www.bilibili.com").
+		SetResult(&CollectResponse{}).Post(baseURL)
 
-	resp, err := req.Post(fullURL)
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +314,7 @@ func (a *Video) Collect(rid int, addMediaIDs, delMediaIDs string) (*CollectRespo
 	return resp.Result().(*CollectResponse), nil
 }
 
-// WebCollect handles the action of collecting or uncollecting a video on the web端.
+// 收藏视频（Web端）
 //
 // Parameters:
 //   - rid (int): 视频的aid
@@ -314,33 +322,33 @@ func (a *Video) Collect(rid int, addMediaIDs, delMediaIDs string) (*CollectRespo
 //   - delMediaIDs (string): 需要取消的收藏夹mlid，多个用逗号分隔（可选）
 //
 // Authentication:
-//   - 认证方式：Cookie（SESSDATA），需要设置csrf token
-func (a *Video) WebCollect(rid int, addMediaIDs, delMediaIDs string) (*WebCollectResponse, error) {
+//   - 认证方式：Cookie（SESSDATA），需要设置csrf
+func (v *Video) CollectWeb(rid int, addMediaIDs, delMediaIDs string) (*WebCollectResponse, error) {
 	baseURL := "https://api.bilibili.com/x/v3/fav/resource/deal"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"rid":           fmt.Sprintf("%d", rid),
 		"type":          "2",
 		"add_media_ids": addMediaIDs,
 		"del_media_ids": delMediaIDs,
-		"csrf":          a.client.CSRF,
-		"platform":      "web",
-		"eab_x":         "1",
-		"ga":            "1",
-		"gaia_source":   "web_normal",
+		"csrf":          v.client.CSRF,
+		// "platform":      "web",
+		// "eab_x":         "1",
+		// "ga":            "1",
+		// "gaia_source":   "web_normal",
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
-	req := a.client.HTTPClient.R().
+	req := v.client.HTTPClient.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetFormData(formData).
 		SetResult(&WebCollectResponse{}).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
-			Value: a.client.SESSDATA,
+			Value: v.client.SESSDATA,
 		}).
 		SetHeader("Referer", "https://www.bilibili.com")
 
-	resp, err := req.Post(fullURL)
+	resp, err := req.Post(baseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -355,32 +363,24 @@ func (a *Video) WebCollect(rid int, addMediaIDs, delMediaIDs string) (*WebCollec
 //
 // Authentication:
 //   - 认证方式：APP（使用access_key）或Cookie（SESSDATA）
-func (a *Video) IsFavoured(aid interface{}) (*FavouredResponse, error) {
+func (v *Video) IsFavoured(aid interface{}) (*FavouredResponse, error) {
 	baseURL := "https://api.bilibili.com/x/v2/fav/video/favoured"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"aid": fmt.Sprintf("%v", aid),
 	}
-	if a.client.AccessKey != "" {
-		params["access_key"] = a.client.AccessKey
+	if v.client.AccessKey != "" {
+		formData["access_key"] = v.client.AccessKey
 	}
 
-	fullURL := tools.URLWithParams(baseURL, params)
-
-	req := a.client.HTTPClient.R().
-		SetResult(&FavouredResponse{})
-
-	// Set authentication headers or cookies
-	if a.client.AccessKey != "" {
-		req.SetHeader("Authorization", "Bearer "+a.client.AccessKey)
-	} else if a.client.SESSDATA != "" {
-		req.SetCookie(&http.Cookie{
+	resp, err := v.client.HTTPClient.R().
+		SetQueryParams(formData).
+		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
-			Value: a.client.SESSDATA,
-		})
-	}
+			Value: v.client.SESSDATA,
+		}).
+		SetResult(&FavouredResponse{}).Get(baseURL)
 
-	resp, err := req.Get(fullURL)
 	if err != nil {
 		return nil, err
 	}
@@ -396,29 +396,25 @@ func (a *Video) IsFavoured(aid interface{}) (*FavouredResponse, error) {
 //
 // Authentication:
 //   - 认证方式：Cookie（SESSDATA），需要设置csrf token
-func (a *Video) TripleLike(aid int, bvid string) (*TripleLikeResponse, error) {
+func (v *Video) TripleLike(aid int, bvid string) (*TripleLikeResponse, error) {
 	baseURL := "https://api.bilibili.com/x/web-interface/archive/like/triple"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"aid":  fmt.Sprintf("%d", aid),
 		"bvid": bvid,
-		"csrf": a.client.CSRF,
+		"csrf": v.client.CSRF,
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
-	req := a.client.HTTPClient.R().
+	resp, err := v.client.HTTPClient.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetFormData(formData).
 		SetResult(&TripleLikeResponse{}).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
-			Value: a.client.SESSDATA,
+			Value: v.client.SESSDATA,
 		}).
-		SetCookie(&http.Cookie{
-			Name:  "buvid3",
-			Value: a.client.Buvid3,
-		})
+		Post(baseURL)
 
-	resp, err := req.Post(fullURL)
 	if err != nil {
 		return nil, err
 	}
@@ -433,20 +429,20 @@ func (a *Video) TripleLike(aid int, bvid string) (*TripleLikeResponse, error) {
 //
 // Authentication:
 //   - 认证方式：APP（使用access_key）
-func (a *Video) AppTripleLike(aid int) (*AppTripleLikeResponse, error) {
+func (v *Video) TripleLikeApp(aid int) (*AppTripleLikeResponse, error) {
 	baseURL := "https://app.biliapi.net/x/v2/view/like/triple"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"aid":        fmt.Sprintf("%d", aid),
-		"access_key": a.client.AccessKey,
+		"access_key": v.client.AccessKey,
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
-	req := a.client.HTTPClient.R().
+	req := v.client.HTTPClient.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetFormData(formData).
 		SetResult(&AppTripleLikeResponse{})
 
-	resp, err := req.Post(fullURL)
+	resp, err := req.Post(baseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -454,33 +450,30 @@ func (a *Video) AppTripleLike(aid int) (*AppTripleLikeResponse, error) {
 	return resp.Result().(*AppTripleLikeResponse), nil
 }
 
-// ShareVideo shares a video on the web.
+// 分享视频 （Web端）?貌似会提示账号异常
 //
 // Parameters:
-//   - aid (int): 视频的aid（可选）
-//   - bvid (string): 视频的bvid（可选）
+//   - aid (int): 视频的aid
 //
 // Authentication:
 //   - 认证方式：Cookie（需要设置csrf token）
-func (a *Video) ShareVideo(aid int, bvid string) (*ShareResponse, error) {
+func (v *Video) Share(aid int) (*ShareResponse, error) {
 	baseURL := "https://api.bilibili.com/x/web-interface/share/add"
 
-	params := map[string]string{
-		"aid":  fmt.Sprintf("%d", aid),
-		"bvid": bvid,
-		"csrf": a.client.CSRF,
+	formData := map[string]string{
+		"aid":    fmt.Sprintf("%d", aid),
+		"csrf":   v.client.CSRF,
+		"eab_x":  "2",
+		"ramval": "1",
+		"source": "web_normal",
+		"ga":     "1",
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
-	req := a.client.HTTPClient.R().
+	resp, err := v.client.HTTPClient.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
+		SetFormData(formData).
 		SetResult(&ShareResponse{}).
-		SetCookie(&http.Cookie{
-			Name:  "csrf",
-			Value: a.client.CSRF,
-		})
-
-	resp, err := req.Post(fullURL)
+		Post(baseURL)
 	if err != nil {
 		return nil, err
 	}

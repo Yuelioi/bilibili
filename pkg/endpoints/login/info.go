@@ -8,12 +8,11 @@ import (
 // Wbi 签名 获取keys
 func (a *Login) UserKeys() (*Keys, error) {
 	baseURL := "https://api.bilibili.com/x/web-interface/nav"
-	fullURL := baseURL
 
 	resp, err := a.client.HTTPClient.R().
-		SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0").
+		SetHeader("User-Agent", a.client.UserAgent).
 		SetResult(&NavUserInfoResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -56,16 +55,15 @@ func (a *Login) SignAndGenerateURL(urlStr string) (string, error) {
 //   - 认证方式：仅可Cookie（SESSDATA）
 func (a *Login) NavUserInfo() (*NavUserInfoResponse, error) {
 	baseURL := "https://api.bilibili.com/x/web-interface/nav"
-	fullURL := baseURL
 
 	resp, err := a.client.HTTPClient.R().
-		SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0").
+		SetHeader("User-Agent", a.client.UserAgent).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&NavUserInfoResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -79,16 +77,15 @@ func (a *Login) NavUserInfo() (*NavUserInfoResponse, error) {
 // 备注：
 //   - 认证方式：Cookie（SESSDATA）或APP
 func (a *Login) UserState() (*UserStateResponse, error) {
-	fullURL := "https://api.bilibili.com/x/web-interface/nav/stat"
+	baseURL := "https://api.bilibili.com/x/web-interface/nav/stat"
 
 	resp, err := a.client.HTTPClient.R().
-		// SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0").
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&UserStateResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err

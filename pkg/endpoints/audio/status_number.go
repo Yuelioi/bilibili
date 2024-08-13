@@ -1,7 +1,6 @@
 package audio
 
 import (
-	"bilibili/tools"
 	"fmt"
 	"net/http"
 )
@@ -17,18 +16,18 @@ import (
 func (a *Audio) GetSongStats(sid int) (*SongStatsResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/stat/song"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"sid": fmt.Sprintf("%d", sid),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&SongStatsResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err

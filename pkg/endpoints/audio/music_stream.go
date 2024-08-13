@@ -1,7 +1,6 @@
 package audio
 
 import (
-	"bilibili/tools"
 	"fmt"
 	"net/http"
 )
@@ -17,18 +16,18 @@ import (
 func (a *Audio) GetAudioURL(sid int) (*AudioURLResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/url"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"sid": fmt.Sprintf("%d", sid),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&AudioURLResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -53,7 +52,7 @@ func (a *Audio) GetAudioURL(sid int) (*AudioURLResponse, error) {
 func (a *Audio) GetPaidAudioURL(accessKey string, songID int, quality int, privilege int, mid int, platform string) (*PaidAudioURLResponse, error) {
 	baseURL := "https://api.bilibili.com/audio/music-service-c/url"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"access_key": accessKey,
 		"songid":     fmt.Sprintf("%d", songID),
 		"quality":    fmt.Sprintf("%d", quality),
@@ -61,15 +60,15 @@ func (a *Audio) GetPaidAudioURL(accessKey string, songID int, quality int, privi
 		"mid":        fmt.Sprintf("%d", mid),
 		"platform":   platform,
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&PaidAudioURLResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err

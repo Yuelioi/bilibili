@@ -1,29 +1,39 @@
 package video
 
 import (
-	"bilibili/tools"
 	"fmt"
 )
 
-// GetSeasonArchives fetches the season archives based on the given parameters.
+// 获取视频合集信息
 //
 // Parameters:
 //   - mid (int): 用户的mid
 //   - seasonID (int): 视频合集 ID
-//   - sortReverse (bool): 排序方式, true表示升序, false表示默认排序
-//   - pageNum (int): 页码索引, 默认为1
-//   - pageSize (int): 单页内容数量, 默认为30
+//   - pageNum (int): 页码索引, 默认为1, 可选
+//   - pageSize (int): 单页内容数量, 默认为20, 可选
+//   - sortReverse (bool): 排序方式, true表示升序, false表示默认排序, 可选
 //   - gaiaVToken (string): 风控验证 Token, 可选
 //   - webLocation (string): 页面位置, 可选
 //   - wRid (string): WBI 签名, 可选
 //   - wts (int): UNIX 秒级时间戳, 可选
 //
 // Authentication:
-//   - 需要验证referer
-func (a *Video) GetSeasonArchives(mid int, seasonID int, sortReverse bool, pageNum, pageSize int, gaiaVToken, webLocation, wRid string, wts int) (*SeasonArchivesResponse, error) {
+//   - 需要验证 referer
+//   - 需要 User-Agent
+func (v *Video) SeasonsArchives(mid int, seasonID int, sortReverse bool, pageNum, pageSize int, gaiaVToken, webLocation, wRid string, wts int) (*SeasonArchivesResponse, error) {
 	baseURL := "https://api.bilibili.com/x/polymer/web-space/seasons_archives_list"
 
-	params := map[string]string{
+	defaultPageNum := 1
+	defaultPageSize := 30
+
+	if pageNum == 0 {
+		pageNum = defaultPageNum
+	}
+	if pageSize == 0 {
+		pageSize = defaultPageSize
+	}
+
+	formData := map[string]string{
 		"mid":          fmt.Sprintf("%d", mid),
 		"season_id":    fmt.Sprintf("%d", seasonID),
 		"sort_reverse": fmt.Sprintf("%v", sortReverse),
@@ -35,13 +45,11 @@ func (a *Video) GetSeasonArchives(mid int, seasonID int, sortReverse bool, pageN
 		"wts":          fmt.Sprintf("%d", wts),
 	}
 
-	fullURL := tools.URLWithParams(baseURL, params)
-
-	req := a.client.HTTPClient.R().
+	resp, err := v.client.HTTPClient.R().
 		SetHeader("Referer", "https://www.bilibili.com").
-		SetResult(&SeasonArchivesResponse{})
-
-	resp, err := req.Get(fullURL)
+		SetHeader("User-Agent", v.client.UserAgent).
+		SetQueryParams(formData).
+		SetResult(&SeasonArchivesResponse{}).Get(baseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -49,22 +57,33 @@ func (a *Video) GetSeasonArchives(mid int, seasonID int, sortReverse bool, pageN
 	return resp.Result().(*SeasonArchivesResponse), nil
 }
 
-// GetSeriesList fetches the series list based on the given parameters.
+// 只获取系列视频
 //
 // Parameters:
 //   - mid (int): 用户的 mid
-//   - pageNum (int): 页码索引
-//   - pageSize (int): 单页内容数量
+//   - pageNum (int): 页码索引, 默认为1, 可选
+//   - pageSize (int): 单页内容数量,默认为20, 可选 (最大为20?)
 //   - gaiaVToken (string): 风控验证 Token, 可选
 //   - wRid (string): WBI 签名, 可选
 //   - wts (int): UNIX 秒级时间戳, 可选
 //
 // Authentication:
 //   - 需要验证 referer
-func (a *Video) GetSeriesList(mid int, pageNum, pageSize int, gaiaVToken, wRid string, wts int) (*SeriesListResponse, error) {
+//   - 需要 User-Agent
+func (v *Video) SeasonsSeries(mid int, pageNum, pageSize int, gaiaVToken, wRid string, wts int) (*SeriesListResponse, error) {
 	baseURL := "https://api.bilibili.com/x/polymer/web-space/home/seasons_series"
 
-	params := map[string]string{
+	defaultPageNum := 1
+	defaultPageSize := 20
+
+	if pageNum == 0 {
+		pageNum = defaultPageNum
+	}
+	if pageSize == 0 {
+		pageSize = defaultPageSize
+	}
+
+	formData := map[string]string{
 		"mid":         fmt.Sprintf("%d", mid),
 		"page_num":    fmt.Sprintf("%d", pageNum),
 		"page_size":   fmt.Sprintf("%d", pageSize),
@@ -73,13 +92,12 @@ func (a *Video) GetSeriesList(mid int, pageNum, pageSize int, gaiaVToken, wRid s
 		"wts":         fmt.Sprintf("%d", wts),
 	}
 
-	fullURL := tools.URLWithParams(baseURL, params)
-
-	req := a.client.HTTPClient.R().
+	resp, err := v.client.HTTPClient.R().
 		SetHeader("Referer", "https://www.bilibili.com").
-		SetResult(&SeriesListResponse{})
+		SetHeader("User-Agent", v.client.UserAgent).
+		SetQueryParams(formData).
+		SetResult(&SeriesListResponse{}).Get(baseURL)
 
-	resp, err := req.Get(fullURL)
 	if err != nil {
 		return nil, err
 	}
@@ -87,23 +105,32 @@ func (a *Video) GetSeriesList(mid int, pageNum, pageSize int, gaiaVToken, wRid s
 	return resp.Result().(*SeriesListResponse), nil
 }
 
-// GetSeasonsAndSeriesList fetches both series and collection lists based on the given parameters.
+// 获取系列和合集视频
 //
 // Parameters:
 //   - mid (int): 用户的 mid
-//   - pageNum (int): 页码
-//   - pageSize (int): 每页数量
+//   - pageNum (int): 页码, 默认1, 可选
+//   - pageSize (int): 每页数量, 默认20, 可选
 //   - wRid (string): WBI 签名, 可选
 //   - wts (int): UNIX 秒级时间戳, 可选
 //   - webLocation (string): 页面位置, 可选
 //
 // Authentication:
 //   - User-Agent: 必须为正常浏览器
-//   - 如果仍被风控, 需要设置 Referer 为 .bilibili.com 下任意页
-func (a *Video) GetSeasonsAndSeriesList(mid int, pageNum, pageSize int, wRid string, wts int, webLocation string) (*SeasonsSeriesListResponse, error) {
+func (v *Video) SeasonsSeriesList(mid int, pageNum, pageSize int, wRid string, wts int, webLocation string) (*SeasonsSeriesListResponse, error) {
 	baseURL := "https://api.bilibili.com/x/polymer/web-space/seasons_series_list"
 
-	params := map[string]string{
+	defaultPageNum := 1
+	defaultPageSize := 20
+
+	if pageNum == 0 {
+		pageNum = defaultPageNum
+	}
+	if pageSize == 0 {
+		pageSize = defaultPageSize
+	}
+
+	formData := map[string]string{
 		"mid":          fmt.Sprintf("%d", mid),
 		"page_num":     fmt.Sprintf("%d", pageNum),
 		"page_size":    fmt.Sprintf("%d", pageSize),
@@ -112,14 +139,11 @@ func (a *Video) GetSeasonsAndSeriesList(mid int, pageNum, pageSize int, wRid str
 		"web_location": webLocation,
 	}
 
-	fullURL := tools.URLWithParams(baseURL, params)
-
-	req := a.client.HTTPClient.R().
-		SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"). // 设置正常浏览器的 User-Agent
-		SetHeader("Referer", "https://www.bilibili.com").                                                                                              // 如果被风控则需设置
-		SetResult(&SeasonsSeriesListResponse{})
-
-	resp, err := req.Get(fullURL)
+	resp, err := v.client.HTTPClient.R().
+		SetHeader("Referer", "https://www.bilibili.com").
+		SetHeader("User-Agent", v.client.UserAgent).
+		SetQueryParams(formData).
+		SetResult(&SeasonsSeriesListResponse{}).Get(baseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -127,26 +151,24 @@ func (a *Video) GetSeasonsAndSeriesList(mid int, pageNum, pageSize int, wRid str
 	return resp.Result().(*SeasonsSeriesListResponse), nil
 }
 
-// GetSeries queries a specific series based on the given series ID.
+// 查询指定系列
 //
 // Parameters:
 //   - seriesID (int): 系列 ID
 //
 // Authentication:
 //   - 无需特殊认证
-func (a *Video) GetSeries(seriesID int) (*SeriesResponse, error) {
+func (v *Video) Series(seriesID int) (*SeriesResponse, error) {
 	baseURL := "https://api.bilibili.com/x/series/series"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"series_id": fmt.Sprintf("%d", seriesID),
 	}
 
-	fullURL := tools.URLWithParams(baseURL, params)
+	resp, err := v.client.HTTPClient.R().
+		SetQueryParams(formData).
+		SetResult(&SeriesResponse{}).Get(baseURL)
 
-	req := a.client.HTTPClient.R().
-		SetResult(&SeriesResponse{})
-
-	resp, err := req.Get(fullURL)
 	if err != nil {
 		return nil, err
 	}
@@ -154,12 +176,11 @@ func (a *Video) GetSeries(seriesID int) (*SeriesResponse, error) {
 	return resp.Result().(*SeriesResponse), nil
 }
 
-// GetSeriesArchives fetches videos from a specific series based on the given parameters.
+// 获取指定系列视频
 //
 // Parameters:
 //   - mid (int): 用户的 mid
 //   - seriesID (int): 系列 ID
-//   - onlyNormal (bool): 作用尚不明确, 默认为 true
 //   - sort (string): 排序方式, 可选值为 "desc" 或 "asc"
 //   - pn (int): 页码, 默认为 1
 //   - ps (int): 每页数量, 默认为 20
@@ -167,25 +188,36 @@ func (a *Video) GetSeries(seriesID int) (*SeriesResponse, error) {
 //
 // Authentication:
 //   - 无需特殊认证
-func (a *Video) GetSeriesArchives(mid, seriesID int, onlyNormal bool, sort string, pn, ps, currentMid int) (*SeriesArchivesResponse, error) {
+func (v *Video) Archives(mid, seriesID int, sort string, pn, ps, currentMid int) (*SeriesArchivesResponse, error) {
 	baseURL := "https://api.bilibili.com/x/series/archives"
 
-	params := map[string]string{
+	defaultPageNum := 1
+	defaultPageSize := 20
+
+	if pn == 0 {
+		pn = defaultPageNum
+	}
+	if ps == 0 {
+		ps = defaultPageSize
+	}
+
+	formData := map[string]string{
 		"mid":         fmt.Sprintf("%d", mid),
 		"series_id":   fmt.Sprintf("%d", seriesID),
-		"only_normal": fmt.Sprintf("%t", onlyNormal),
+		"only_normal": fmt.Sprintf("%t", true), // 作用尚不明确, 默认为 true
 		"sort":        sort,
 		"pn":          fmt.Sprintf("%d", pn),
 		"ps":          fmt.Sprintf("%d", ps),
 		"current_mid": fmt.Sprintf("%d", currentMid),
 	}
 
-	fullURL := tools.URLWithParams(baseURL, params)
+	fmt.Printf("formData: %v\n", formData)
 
-	req := a.client.HTTPClient.R().
+	req := v.client.HTTPClient.R().
+		SetQueryParams(formData).
 		SetResult(&SeriesArchivesResponse{})
 
-	resp, err := req.Get(fullURL)
+	resp, err := req.Get(baseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -213,6 +245,23 @@ type Archive struct {
 	Ctime            int         `json:"ctime"`             // 创建时间 Unix 时间戳
 	Duration         int         `json:"duration"`          // 视频时长 单位为秒
 	EnableVt         bool        `json:"enable_vt"`         // 是否支持互动视频
+	InteractiveVideo bool        `json:"interactive_video"` // 是否是互动视频
+	Pic              string      `json:"pic"`               // 封面 URL
+	PlaybackPosition int         `json:"playback_position"` // 播放位置 单位为 %
+	Pubdate          int         `json:"pubdate"`           // 发布日期 Unix 时间戳
+	Stat             ArchiveStat `json:"stat"`              // 稿件信息
+	State            int         `json:"state"`             // 状态值
+	Title            string      `json:"title"`             // 稿件标题
+	UgcPay           int         `json:"ugc_pay"`           // UGC 付费标识
+	VtDisplay        string      `json:"vt_display"`        // 旧接口无
+}
+
+type SeasonArchive struct {
+	Aid              int         `json:"aid"`               // 稿件 avid
+	Bvid             string      `json:"bvid"`              // 稿件 bvid
+	Ctime            int         `json:"ctime"`             // 创建时间 Unix 时间戳
+	Duration         int         `json:"duration"`          // 视频时长 单位为秒
+	EnableVt         int         `json:"enable_vt"`         // 是否支持互动视频
 	InteractiveVideo bool        `json:"interactive_video"` // 是否是互动视频
 	Pic              string      `json:"pic"`               // 封面 URL
 	PlaybackPosition int         `json:"playback_position"` // 播放位置 单位为 %
@@ -323,8 +372,8 @@ type SeriesArchivesResponse struct {
 	Message string `json:"message"` // 错误信息, 默认为0
 	TTL     int    `json:"ttl"`     // TTL, 固定值1
 	Data    struct {
-		Aids     []int          `json:"aids"`     // 视频 aid 列表
-		Page     PaginationInfo `json:"page"`     // 页码信息
-		Archives []Archive      `json:"archives"` // 视频信息列表
+		Aids     []int           `json:"aids"`     // 视频 aid 列表
+		Page     PaginationInfo  `json:"page"`     // 页码信息
+		Archives []SeasonArchive `json:"archives"` // 视频信息列表
 	} `json:"data"`
 }

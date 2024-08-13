@@ -1,7 +1,6 @@
 package audio
 
 import (
-	"bilibili/tools"
 	"fmt"
 	"net/http"
 )
@@ -16,22 +15,21 @@ import (
 func (a *Audio) Collect(sid int) (*CollectResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/collections/songs-coll"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"sid": fmt.Sprintf("%d", sid),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
-		SetCookie(&http.Cookie{
-			Name:  "SESSDATA",
-			Value: a.client.SESSDATA,
-		}).
-		SetCookie(&http.Cookie{
-			Name:  "DedeUserID",
-			Value: fmt.Sprint(a.client.DedeUserID),
-		}).
+		SetFormData(formData).
+		SetCookies([]*http.Cookie{
+			{
+				Name:  "SESSDATA",
+				Value: a.client.SESSDATA},
+			{
+				Name:  "DedeUserID",
+				Value: fmt.Sprint(a.client.DedeUserID)}}).
 		SetResult(&CollectResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -51,22 +49,21 @@ func (a *Audio) Collect(sid int) (*CollectResponse, error) {
 func (a *Audio) Coin(sid int) (*CoinResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/coin/audio"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"sid": fmt.Sprintf("%d", sid),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
-		SetCookie(&http.Cookie{
-			Name:  "SESSDATA",
-			Value: a.client.SESSDATA,
-		}).
-		SetCookie(&http.Cookie{
-			Name:  "DedeUserID",
-			Value: fmt.Sprint(a.client.DedeUserID),
-		}).
+		SetFormData(formData).
+		SetCookies([]*http.Cookie{
+			{
+				Name:  "SESSDATA",
+				Value: a.client.SESSDATA},
+			{
+				Name:  "DedeUserID",
+				Value: fmt.Sprint(a.client.DedeUserID)}}).
 		SetResult(&CoinResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -87,7 +84,7 @@ func (a *Audio) Coin(sid int) (*CoinResponse, error) {
 func (a *Audio) AddCoin(sid, multiply int) (*AddCoinResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/coin/add"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"sid":      fmt.Sprintf("%d", sid),
 		"multiply": fmt.Sprintf("%d", multiply),
 		"csrf":     a.client.CSRF,
@@ -95,16 +92,15 @@ func (a *Audio) AddCoin(sid, multiply int) (*AddCoinResponse, error) {
 
 	resp, err := a.client.HTTPClient.R().
 		SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		SetCookie(&http.Cookie{
-			Name:  "SESSDATA",
-			Value: a.client.SESSDATA,
-		}).
-		SetCookie(&http.Cookie{
-			Name:  "DedeUserID",
-			Value: fmt.Sprint(a.client.DedeUserID),
-		}).
+		SetFormData(formData).
+		SetCookies([]*http.Cookie{
+			{
+				Name:  "SESSDATA",
+				Value: a.client.SESSDATA},
+			{
+				Name:  "DedeUserID",
+				Value: fmt.Sprint(a.client.DedeUserID)}}).
 		SetResult(&AddCoinResponse{}).
-		SetFormData(params).
 		Post(baseURL)
 
 	if err != nil {

@@ -1,10 +1,8 @@
 package audio
 
 import (
-	"bilibili/tools"
 	"fmt"
 	"net/http"
-	"net/url"
 )
 
 // 获取音频榜单每期列表
@@ -15,24 +13,24 @@ import (
 //
 // 备注：
 //   - CSRF Token在cookie中，不一定需要提供
-func (a *Audio) GetTopList(listType int, csrfToken string) (*TopListResponse, error) {
+func (a *Audio) GetTopList(listType int) (*TopListResponse, error) {
 	baseURL := "https://api.bilibili.com/x/copyright-music-publicity/toplist/all_period"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"list_type": fmt.Sprintf("%d", listType),
 	}
-	if csrfToken != "" {
-		params["csrf"] = csrfToken
+	if a.client.CSRF != "" {
+		formData["csrf"] = a.client.CSRF
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&TopListResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -49,24 +47,24 @@ func (a *Audio) GetTopList(listType int, csrfToken string) (*TopListResponse, er
 //
 // 备注：
 //   - CSRF Token在cookie中，不一定需要提供
-func (a *Audio) GetTopListDetail(listID int, csrfToken string) (*TopListDetailResponse, error) {
+func (a *Audio) GetTopListDetail(listID int) (*TopListDetailResponse, error) {
 	baseURL := "https://api.bilibili.com/x/copyright-music-publicity/toplist/detail"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"list_id": fmt.Sprintf("%d", listID),
 	}
-	if csrfToken != "" {
-		params["csrf"] = csrfToken
+	if a.client.CSRF != "" {
+		formData["csrf"] = a.client.CSRF
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&TopListDetailResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -83,24 +81,24 @@ func (a *Audio) GetTopListDetail(listID int, csrfToken string) (*TopListDetailRe
 //
 // 备注：
 //   - CSRF Token在cookie中，不一定需要提供
-func (a *Audio) GetTopListMusic(listID int, csrfToken string) (*TopListMusicResponse, error) {
+func (a *Audio) GetTopListMusic(listID int) (*TopListMusicResponse, error) {
 	baseURL := "https://api.bilibili.com/x/copyright-music-publicity/toplist/music_list"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"list_id": fmt.Sprintf("%d", listID),
 	}
-	if csrfToken != "" {
-		params["csrf"] = csrfToken
+	if a.client.CSRF != "" {
+		formData["csrf"] = a.client.CSRF
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&TopListMusicResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -109,7 +107,7 @@ func (a *Audio) GetTopListMusic(listID int, csrfToken string) (*TopListMusicResp
 	return resp.Result().(*TopListMusicResponse), nil
 }
 
-// SubscribeOrUnsubscribeTopList订阅或退订榜单
+// SubscribeOrUnsubscribeTopList 订阅或退订榜单
 //
 // 参数：
 //   - state (int): 操作代码，1表示订阅，2表示退订
@@ -118,26 +116,24 @@ func (a *Audio) GetTopListMusic(listID int, csrfToken string) (*TopListMusicResp
 //
 // 备注：
 //   - 需要通过 Cookie 进行认证
-func (a *Audio) SubscribeOrUnsubscribeTopList(state int, listID int, csrfToken string) (*SubscribeOrUnsubscribeResponse, error) {
+func (a *Audio) SubscribeOrUnsubscribeTopList(state int, listID int) (*SubscribeOrUnsubscribeResponse, error) {
 	baseURL := "https://api.bilibili.com/x/copyright-music-publicity/toplist/subscribe/update"
 
-	// 准备请求的表单数据
-	data := url.Values{}
-	data.Set("state", fmt.Sprintf("%d", state))
-	if listID != 0 {
-		data.Set("list_id", fmt.Sprintf("%d", listID))
+	formData := map[string]string{
+		"state":   fmt.Sprintf("%d", state),
+		"list_id": fmt.Sprintf("%d", listID),
+		"csrf":    a.client.CSRF,
 	}
-	data.Set("csrf", csrfToken)
 
 	var result SubscribeOrUnsubscribeResponse
 
 	// 执行 POST 请求
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
-		SetBody(data).
 		SetResult(&result).
 		Post(baseURL)
 

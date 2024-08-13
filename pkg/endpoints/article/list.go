@@ -2,7 +2,6 @@ package article
 
 import (
 	"bilibili/pkg/endpoints/login"
-	"bilibili/tools"
 	"fmt"
 	"net/http"
 )
@@ -21,24 +20,22 @@ import (
 func (a *Article) ArticleList(mid, pn, ps int, sort string) (*ListResponse, error) {
 	baseURL := "https://api.bilibili.com/x/space/wbi/article"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"mid":  fmt.Sprintf("%d", mid),
 		"pn":   fmt.Sprintf("%d", pn),
 		"ps":   fmt.Sprintf("%d", ps),
 		"sort": sort,
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
-	newUrl, err := login.New(a.client).SignAndGenerateURL(fullURL)
+	newUrl, err := login.New(a.client).SignAndGenerateURL(baseURL)
 
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("newUrl: %v\n", newUrl)
-
 	resp, err := a.client.HTTPClient.R().
-		SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0").
+		SetHeader("User-Agent", a.client.UserAgent).
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
@@ -64,20 +61,20 @@ func (a *Article) ArticleList(mid, pn, ps int, sort string) (*ListResponse, erro
 func (a *Article) ReadList(mid, sort int) (*ReadListResponse, error) {
 	baseURL := "https://api.bilibili.com/x/article/up/lists"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"mid":  fmt.Sprintf("%d", mid),
 		"sort": fmt.Sprintf("%d", sort),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
-		SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0").
+		SetHeader("User-Agent", a.client.UserAgent).
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&ReadListResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err

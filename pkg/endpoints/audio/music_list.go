@@ -1,7 +1,6 @@
 package audio
 
 import (
-	"bilibili/tools"
 	"fmt"
 	"net/http"
 )
@@ -18,23 +17,22 @@ import (
 func (a *Audio) CreatedCollections(pn, ps int) (*CreatedCollectionsResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/collections/list"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"pn": fmt.Sprintf("%d", pn),
 		"ps": fmt.Sprintf("%d", ps),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
-		SetCookie(&http.Cookie{
-			Name:  "SESSDATA",
-			Value: a.client.SESSDATA,
-		}).
-		SetCookie(&http.Cookie{
-			Name:  "DedeUserID",
-			Value: fmt.Sprintf("%d", a.client.DedeUserID),
-		}).
+		SetFormData(formData).
+		SetCookies([]*http.Cookie{
+			{
+				Name:  "SESSDATA",
+				Value: a.client.SESSDATA},
+			{
+				Name:  "DedeUserID",
+				Value: fmt.Sprint(a.client.DedeUserID)}}).
 		SetResult(&CreatedCollectionsResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -54,22 +52,21 @@ func (a *Audio) CreatedCollections(pn, ps int) (*CreatedCollectionsResponse, err
 func (a *Audio) CollectionInfo(sid int) (*CollectionInfoResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/collections/info"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"sid": fmt.Sprintf("%d", sid),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
-		SetCookie(&http.Cookie{
-			Name:  "SESSDATA",
-			Value: a.client.SESSDATA,
-		}).
-		SetCookie(&http.Cookie{
-			Name:  "DedeUserID",
-			Value: fmt.Sprint(a.client.DedeUserID),
-		}).
+		SetFormData(formData).
+		SetCookies([]*http.Cookie{
+			{
+				Name:  "SESSDATA",
+				Value: a.client.SESSDATA},
+			{
+				Name:  "DedeUserID",
+				Value: fmt.Sprint(a.client.DedeUserID)}}).
 		SetResult(&CollectionInfoResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -89,19 +86,19 @@ func (a *Audio) CollectionInfo(sid int) (*CollectionInfoResponse, error) {
 func (a *Audio) HotPlaylists(pn, ps int) (*HotPlaylistsResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/menu/hit"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"pn": fmt.Sprintf("%d", pn),
 		"ps": fmt.Sprintf("%d", ps),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&HotPlaylistsResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err
@@ -121,19 +118,19 @@ func (a *Audio) HotPlaylists(pn, ps int) (*HotPlaylistsResponse, error) {
 func (a *Audio) HotRank(pn, ps int) (*HotRankResponse, error) {
 	baseURL := "https://www.bilibili.com/audio/music-service-c/web/menu/rank"
 
-	params := map[string]string{
+	formData := map[string]string{
 		"pn": fmt.Sprintf("%d", pn),
 		"ps": fmt.Sprintf("%d", ps),
 	}
-	fullURL := tools.URLWithParams(baseURL, params)
 
 	resp, err := a.client.HTTPClient.R().
+		SetFormData(formData).
 		SetCookie(&http.Cookie{
 			Name:  "SESSDATA",
 			Value: a.client.SESSDATA,
 		}).
 		SetResult(&HotRankResponse{}).
-		Get(fullURL)
+		Get(baseURL)
 
 	if err != nil {
 		return nil, err

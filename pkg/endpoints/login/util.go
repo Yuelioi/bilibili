@@ -3,6 +3,7 @@ package login
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"net/url"
 	"sort"
 	"strconv"
@@ -87,6 +88,7 @@ func updateCache(a *Login) {
 	keys, err := a.UserKeys()
 
 	if err != nil {
+		fmt.Printf("keys 获取失败, err:%s", err)
 		return
 	}
 	imgKey := keys.ImgURL

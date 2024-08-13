@@ -36,13 +36,13 @@ func NewTestClient() *TestClient {
 }
 
 func (t *TestClient) WithSessdata() *TestClient {
-	sessdata := os.Getenv("SESSDATA")
-	t.Client.SESSDATA = sessdata
+	value := os.Getenv("SESSDATA")
+	t.Client.SESSDATA = value
 	return t
 }
 func (t *TestClient) WithDedeUserID() *TestClient {
-	userID := os.Getenv("DedeUserID")
-	uid, err := strconv.Atoi(userID)
+	value := os.Getenv("DedeUserID")
+	uid, err := strconv.Atoi(value)
 	if err != nil {
 		t.Client.DedeUserID = 0
 	} else {
@@ -52,8 +52,19 @@ func (t *TestClient) WithDedeUserID() *TestClient {
 }
 
 func (t *TestClient) WithCRSF() *TestClient {
-	csrf := os.Getenv("CSRF")
-	t.Client.CSRF = csrf
+	value := os.Getenv("CSRF")
+	t.Client.CSRF = value
+	return t
+}
+
+func (t *TestClient) WithBuvid3() *TestClient {
+	value := os.Getenv("Buvid3")
+	t.Client.Buvid3 = value
+	return t
+}
+func (t *TestClient) WithAccessKey() *TestClient {
+	value := os.Getenv("AccessKey")
+	t.Client.AccessKey = value
 	return t
 }
 

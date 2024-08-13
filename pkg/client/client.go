@@ -6,6 +6,7 @@ import (
 
 type Client struct {
 	HTTPClient *resty.Client
+	UserAgent  string
 	DedeUserID int
 	SESSDATA   string
 	CSRF       string
@@ -14,5 +15,5 @@ type Client struct {
 }
 
 func New() *Client {
-	return &Client{HTTPClient: resty.New()}
+	return &Client{HTTPClient: resty.New(), UserAgent: UserAgent}
 }
