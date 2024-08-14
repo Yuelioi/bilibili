@@ -3,18 +3,46 @@ package bpi
 import (
 	"bilibili/pkg/client"
 	"bilibili/pkg/endpoints/article"
+	"bilibili/pkg/endpoints/audio"
+	"bilibili/pkg/endpoints/video"
+	"sync"
 )
 
-type BPI struct {
-	Article *article.Article
-	Client  *client.Client
+type BpiService struct {
+	Client *client.Client
+
+	articleOnce sync.Once
+	audioOnce   sync.Once
+	videoOnce   sync.Once
+
+	article *article.Article
+	audio   *audio.Audio
+	video   *video.Video
 }
 
-// New initializes the App struct and all its modules
-func New(cli *client.Client) *BPI {
-
-	return &BPI{
-		Client:  cli,
-		Article: article.New(cli),
+func New(cli *client.Client) *BpiService {
+	return &BpiService{
+		Client: cli,
 	}
+}
+
+func (s *BpiService) Article() *article.Article {
+	s.articleOnce.Do(func() {
+		s.article = article.New(s.Client)
+	})
+	return s.article
+}
+
+func (s *BpiService) Audio() *audio.Audio {
+	s.audioOnce.Do(func() {
+		s.audio = audio.New(s.Client)
+	})
+	return s.audio
+}
+
+func (s *BpiService) Video() *video.Video {
+	s.videoOnce.Do(func() {
+		s.video = video.New(s.Client)
+	})
+	return s.video
 }
