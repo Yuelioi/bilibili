@@ -1,11 +1,12 @@
 package main
 
 import (
-	"bilibili/pkg/bpi"
-	"bilibili/pkg/client"
-	"bilibili/tests"
 	"fmt"
 	"os"
+
+	"github.com/Yuelioi/bilibili/pkg/bpi"
+	"github.com/Yuelioi/bilibili/pkg/client"
+	"github.com/Yuelioi/bilibili/tests"
 )
 
 func main() {

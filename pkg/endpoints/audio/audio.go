@@ -1,6 +1,6 @@
 package audio
 
-import "bilibili/pkg/client"
+import "github.com/Yuelioi/bilibili/pkg/client"
 
 type Audio struct {
 	client *client.Client

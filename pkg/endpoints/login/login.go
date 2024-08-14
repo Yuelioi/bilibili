@@ -1,6 +1,6 @@
 package login
 
-import "bilibili/pkg/client"
+import "github.com/Yuelioi/bilibili/pkg/client"
 
 type Login struct {
 	client *client.Client

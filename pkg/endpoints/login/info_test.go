@@ -1,9 +1,10 @@
 package login
 
 import (
-	"bilibili/tests"
 	"net/http"
 	"testing"
+
+	"github.com/Yuelioi/bilibili/tests"
 
 	"github.com/stretchr/testify/assert"
 )

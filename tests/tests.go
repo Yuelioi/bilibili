@@ -1,13 +1,14 @@
 package tests
 
 import (
-	"bilibili/pkg/client"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
 	"testing"
+
+	"github.com/Yuelioi/bilibili/pkg/client"
 
 	"github.com/joho/godotenv"
 )

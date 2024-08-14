@@ -1,4 +1,4 @@
-module bilibili
+module github.com/Yuelioi/bilibili
 
 go 1.20
 

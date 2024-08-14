@@ -1,6 +1,6 @@
 package article
 
-import "bilibili/pkg/client"
+import "github.com/Yuelioi/bilibili/pkg/client"
 
 type Article struct {
 	client *client.Client

@@ -1,8 +1,9 @@
 package audio
 
 import (
-	"bilibili/tests"
 	"testing"
+
+	"github.com/Yuelioi/bilibili/tests"
 
 	"github.com/stretchr/testify/assert"
 )

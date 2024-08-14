@@ -1,11 +1,12 @@
 package bpi
 
 import (
-	"bilibili/pkg/client"
-	"bilibili/pkg/endpoints/article"
-	"bilibili/pkg/endpoints/audio"
-	"bilibili/pkg/endpoints/video"
 	"sync"
+
+	"github.com/Yuelioi/bilibili/pkg/client"
+	"github.com/Yuelioi/bilibili/pkg/endpoints/article"
+	"github.com/Yuelioi/bilibili/pkg/endpoints/audio"
+	"github.com/Yuelioi/bilibili/pkg/endpoints/video"
 )
 
 type BpiService struct {

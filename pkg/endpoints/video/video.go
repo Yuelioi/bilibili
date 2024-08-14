@@ -1,6 +1,6 @@
 package video
 
-import "bilibili/pkg/client"
+import "github.com/Yuelioi/bilibili/pkg/client"
 
 type Video struct {
 	client *client.Client
