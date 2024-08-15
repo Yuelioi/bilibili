@@ -5,17 +5,15 @@ import (
 	"os"
 
 	"github.com/Yuelioi/bilibili/pkg/bpi"
-	"github.com/Yuelioi/bilibili/pkg/client"
 	"github.com/Yuelioi/bilibili/tests"
 )
 
 func main() {
 
 	tests.LoadEnv()
-	cli := client.New()
-	cli.SESSDATA = os.Getenv("SESSDATA")
-	cli.CSRF = os.Getenv("CSRF")
-	bpi := bpi.New(cli)
+	bpi := bpi.New()
+	bpi.Client.SESSDATA = os.Getenv("SESSDATA")
+	bpi.Client.CSRF = os.Getenv("CSRF")
 	resp, _ := bpi.Video().Info(0, "BV18x4y1s7jP")
 
 	fmt.Printf("resp: %v\n", resp)

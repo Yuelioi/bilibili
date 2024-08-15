@@ -7,6 +7,7 @@ import (
 	"github.com/Yuelioi/bilibili/pkg/endpoints/article"
 	"github.com/Yuelioi/bilibili/pkg/endpoints/audio"
 	"github.com/Yuelioi/bilibili/pkg/endpoints/video"
+	"github.com/go-resty/resty/v2"
 )
 
 type BpiService struct {
@@ -21,7 +22,8 @@ type BpiService struct {
 	video   *video.Video
 }
 
-func New(cli *client.Client) *BpiService {
+func New() *BpiService {
+	cli := &client.Client{HTTPClient: resty.New(), UserAgent: client.UserAgent}
 	return &BpiService{
 		Client: cli,
 	}
