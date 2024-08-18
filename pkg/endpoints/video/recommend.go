@@ -47,7 +47,7 @@ func (v *Video) GetRelatedVideos(aid int, bvid string) (*RelatedVideosResponse, 
 //   - lastShowlist (string): 上次抓取的视频av号列表
 //   - uniqID (string): ??? (作用尚不明确)
 //   - wRid (string): WBI 签名
-//   - wts (int64): UNIX 时间戳
+//   - wts (int): UNIX 时间戳
 //
 // 认证方式：Cookie（SESSDATA）
 // 最多获取30条推荐视频,直播及推荐边栏
@@ -68,7 +68,7 @@ func (v *Video) GetHomePageRecommendations(
 	lastShowlist string,
 	uniqID string,
 	wRid string,
-	wts int64,
+	wts int,
 ) (*HomePageRcmdResponse, error) {
 	baseURL := "https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd"
 

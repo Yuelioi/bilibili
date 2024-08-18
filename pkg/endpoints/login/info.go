@@ -113,7 +113,7 @@ type UserInfoData struct {
 	EmailVerified      int            `json:"email_verified"`       // 是否验证邮箱地址 0：未验证 1：已验证
 	Face               string         `json:"face"`                 // 用户头像 url
 	LevelInfo          LevelInfo      `json:"level_info"`           // 等级信息
-	Mid                int64          `json:"mid"`                  // 用户 mid
+	Mid                int            `json:"mid"`                  // 用户 mid
 	MobileVerified     int            `json:"mobile_verified"`      // 是否验证手机号 0：未验证 1：已验证
 	Money              float64        `json:"money"`                // 拥有硬币数
 	Moral              int            `json:"moral"`                // 当前节操值 上限为70
@@ -122,7 +122,7 @@ type UserInfoData struct {
 	Pendant            Pendant        `json:"pendant"`              // 头像框信息
 	Scores             int            `json:"scores"`               // （？）
 	Uname              string         `json:"uname"`                // 用户昵称
-	VipDueDate         int64          `json:"vipDueDate"`           // 会员到期时间 毫秒 时间戳
+	VipDueDate         int            `json:"vipDueDate"`           // 会员到期时间 毫秒 时间戳
 	VipStatus          int            `json:"vipStatus"`            // 会员开通状态 0：无 1：有
 	VipType            int            `json:"vipType"`              // 会员类型 0：无 1：月度大会员 2：年度及以上大会员
 	VipPayType         int            `json:"vip_pay_type"`         // 会员开通状态 0：无 1：有
@@ -167,7 +167,7 @@ type Pendant struct {
 	PID    int    `json:"pid"`    // 挂件id
 	Name   string `json:"name"`   // 挂件名称
 	Image  string `json:"image"`  // 挂件图片url
-	Expire int64  `json:"expire"` // （？）
+	Expire int    `json:"expire"` // （？）
 }
 
 // VipLabel data中的vip_label对象
@@ -179,10 +179,10 @@ type VipLabel struct {
 
 // Wallet data中的wallet对象
 type Wallet struct {
-	Mid           int64 `json:"mid"`             // 登录用户mid
-	BCoinBalance  int   `json:"bcoin_balance"`   // 拥有B币数
-	CouponBalance int   `json:"coupon_balance"`  // 每月奖励B币数
-	CouponDueTime int64 `json:"coupon_due_time"` // （？）
+	Mid           int `json:"mid"`             // 登录用户mid
+	BCoinBalance  int `json:"bcoin_balance"`   // 拥有B币数
+	CouponBalance int `json:"coupon_balance"`  // 每月奖励B币数
+	CouponDueTime int `json:"coupon_due_time"` // （？）
 }
 
 // WbiImg data中的wbi_img对象

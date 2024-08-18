@@ -138,8 +138,8 @@ type VideoData struct {
 	Copyright          int          `json:"copyright"`            // 视频类型: 1表示原创, 2表示转载
 	Pic                string       `json:"pic"`                  // 稿件封面图片url
 	Title              string       `json:"title"`                // 稿件标题
-	PubDate            int64        `json:"pubdate"`              // 稿件发布时间, 秒级时间戳
-	CTime              int64        `json:"ctime"`                // 用户投稿时间, 秒级时间戳
+	PubDate            int          `json:"pubdate"`              // 稿件发布时间, 秒级时间戳
+	CTime              int          `json:"ctime"`                // 用户投稿时间, 秒级时间戳
 	Desc               string       `json:"desc"`                 // 视频简介
 	DescV2             []DescV2Item `json:"desc_v2"`              // 新版视频简介
 	State              int          `json:"state"`                // 视频状态
@@ -160,7 +160,7 @@ type VideoData struct {
 	NoCache            bool         `json:"no_cache"`             // 作用尚不明确
 	Pages              []Page       `json:"pages"`                // 视频分P列表
 	Subtitle           Subtitle     `json:"subtitle"`             // 视频CC字幕信息
-	UgcSesson          UGCSeason    `json:"ugc_season"`           // 合集信息
+	UgcSeason          UGCSeason    `json:"ugc_season"`           // 合集信息
 	Staff              []Staff      `json:"staff"`                // 合作成员列表
 	IsSeasonDisplay    bool         `json:"is_season_display"`    // 是否为季显示
 	UserGarb           interface{}  `json:"user_garb"`            // 用户装扮信息
@@ -324,7 +324,7 @@ type UGCSeason struct {
 	ID        int       `json:"id"`         // 作品的唯一标识符
 	Title     string    `json:"title"`      // 作品的标题
 	Cover     string    `json:"cover"`      // 作品封面图片的URL
-	MID       int64     `json:"mid"`        // 作品作者的唯一标识符
+	MID       int       `json:"mid"`        // 作品作者的唯一标识符
 	Intro     string    `json:"intro"`      // 作品的简介
 	SignState int       `json:"sign_state"` // 作品的签约状态
 	Attribute int       `json:"attribute"`  // 作品的属性标识符
@@ -343,8 +343,8 @@ type Episode struct {
 	SeasonID  int    `json:"season_id"`  // 剧集所属的作品ID
 	SectionID int    `json:"section_id"` // 剧集所属的章节ID
 	ID        int    `json:"id"`         // 剧集的唯一标识符
-	AID       int64  `json:"aid"`        // 视频的唯一标识符
-	CID       int64  `json:"cid"`        // 视频内容的唯一标识符
+	AID       int    `json:"aid"`        // 视频的唯一标识符
+	CID       int    `json:"cid"`        // 视频内容的唯一标识符
 	Title     string `json:"title"`      // 剧集的标题
 	Attribute int    `json:"attribute"`  // 剧集的属性标识符
 	Arc       Arc    `json:"arc"`        // 视频的详细信息
@@ -353,15 +353,15 @@ type Episode struct {
 }
 
 type Arc struct {
-	AID       int64     `json:"aid"`       // 视频的唯一标识符
+	AID       int       `json:"aid"`       // 视频的唯一标识符
 	Videos    int       `json:"videos"`    // 视频的数量
 	TypeID    int       `json:"type_id"`   // 视频的类型ID
 	TypeName  string    `json:"type_name"` // 视频的类型名称
 	Copyright int       `json:"copyright"` // 视频的版权类型
 	Pic       string    `json:"pic"`       // 视频封面的URL
 	Title     string    `json:"title"`     // 视频的标题
-	Pubdate   int64     `json:"pubdate"`   // 视频的发布时间
-	Ctime     int64     `json:"ctime"`     // 视频创建的时间
+	Pubdate   int       `json:"pubdate"`   // 视频的发布时间
+	Ctime     int       `json:"ctime"`     // 视频创建的时间
 	Desc      string    `json:"desc"`      // 视频的描述
 	State     int       `json:"state"`     // 视频的状态
 	Duration  int       `json:"duration"`  // 视频的时长，单位为秒
@@ -373,7 +373,7 @@ type Arc struct {
 }
 
 type Author struct {
-	MID  int64  `json:"mid"`  // 作者的唯一标识符
+	MID  int    `json:"mid"`  // 作者的唯一标识符
 	Name string `json:"name"` // 作者的名称
 	Face string `json:"face"` // 作者头像的URL
 }
@@ -482,7 +482,7 @@ type OfficialVerify struct {
 type Vip struct {
 	Type               int    `json:"type"`                 // 会员类型，0：无，1：月大会员，2：年度及以上大会员
 	Status             int    `json:"status"`               // 会员状态，0：无，1：有
-	DueDate            int64  `json:"due_date"`             // 会员过期时间，Unix 时间戳（毫秒）
+	DueDate            int    `json:"due_date"`             // 会员过期时间，Unix 时间戳（毫秒）
 	VipPayType         int    `json:"vip_pay_type"`         // 支付类型，0：未支付，1：已支付
 	ThemeType          int    `json:"theme_type"`           // 作用尚不明确，默认为 0
 	Label              Label  `json:"label"`                // 会员标签
@@ -528,26 +528,26 @@ type Reply struct {
 
 // TODO Reply 表示视频热评信息
 type Related struct {
-	Aid         int64       `json:"aid"`           // 视频AV号
+	Aid         int         `json:"aid"`           // 视频AV号
 	Videos      int         `json:"videos"`        // 视频集数
 	Tid         int         `json:"tid"`           // 分区ID
 	Tname       string      `json:"tname"`         // 分区名称
 	Copyright   int         `json:"copyright"`     // 版权标识
 	Pic         string      `json:"pic"`           // 视频封面图片地址
 	Title       string      `json:"title"`         // 视频标题
-	Pubdate     int64       `json:"pubdate"`       // 发布时间，Unix时间戳
-	Ctime       int64       `json:"ctime"`         // 创建时间，Unix时间戳
+	Pubdate     int         `json:"pubdate"`       // 发布时间，Unix时间戳
+	Ctime       int         `json:"ctime"`         // 创建时间，Unix时间戳
 	Desc        string      `json:"desc"`          // 视频描述
 	State       int         `json:"state"`         // 状态
 	Duration    int         `json:"duration"`      // 视频时长，单位秒
-	MissionID   int64       `json:"mission_id"`    // 任务ID
+	MissionID   int         `json:"mission_id"`    // 任务ID
 	Rights      Rights      `json:"rights"`        // 视频权限信息
 	Owner       Owner       `json:"owner"`         // 视频UP主信息
 	Stat        Stat        `json:"stat"`          // 视频统计信息
 	Dynamic     string      `json:"dynamic"`       // 动态信息
-	Cid         int64       `json:"cid"`           // 视频CID
+	Cid         int         `json:"cid"`           // 视频CID
 	Dimension   Dimension   `json:"dimension"`     // 视频维度信息
-	SeasonID    int64       `json:"season_id"`     // 剧集ID
+	SeasonID    int         `json:"season_id"`     // 剧集ID
 	ShortLinkV2 string      `json:"short_link_v2"` // 短链接
 	FirstFrame  string      `json:"first_frame"`   // 视频第一帧图片地址
 	PubLocation string      `json:"pub_location"`  // 发布位置

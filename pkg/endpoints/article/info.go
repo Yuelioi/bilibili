@@ -53,7 +53,7 @@ type ArticleInfoData struct {
 	Stats           Stats          `json:"stats"`             // 状态数信息(与articles.Stats一样)
 	Title           string         `json:"title"`             // 文章标题
 	BannerURL       string         `json:"banner_url"`        // 文章头图url
-	MID             int64          `json:"mid"`               // 文章作者mid
+	MID             int            `json:"mid"`               // 文章作者mid
 	AuthorName      string         `json:"author_name"`       // 文章作者昵称
 	IsAuthor        bool           `json:"is_author"`         // 作用尚不明确
 	ImageURLs       []string       `json:"image_urls"`        // 动态封面
@@ -62,8 +62,8 @@ type ArticleInfoData struct {
 	ShowLaterWatch  bool           `json:"show_later_watch"`  // 作用尚不明确
 	ShowSmallWindow bool           `json:"show_small_window"` // 作用尚不明确
 	InList          bool           `json:"in_list"`           // 是否收于文集
-	Pre             int64          `json:"pre"`               // 上一篇文章cvid
-	Next            int64          `json:"next"`              // 下一篇文章cvid
+	Pre             int            `json:"pre"`               // 上一篇文章cvid
+	Next            int            `json:"next"`              // 下一篇文章cvid
 	ShareChannels   []ShareChannel `json:"share_channels"`    // 分享方式列表
 	Type            int            `json:"type"`              // 文章类别
 }

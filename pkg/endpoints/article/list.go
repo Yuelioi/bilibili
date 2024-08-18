@@ -115,8 +115,8 @@ type ListArticle struct {
 	Author          ListAuthor     `json:"author"`
 	Reprint         int            `json:"reprint"`
 	ImageURLs       []string       `json:"image_urls"`
-	PublishTime     int64          `json:"publish_time"`
-	CTime           int64          `json:"ctime"`
+	PublishTime     int            `json:"publish_time"`
+	CTime           int            `json:"ctime"`
 	Stats           Stats          `json:"stats"`
 	Tags            []Tag          `json:"tags"`
 	Words           int            `json:"words"`
@@ -166,7 +166,7 @@ type Pendant struct {
 type Vip struct {
 	Type            int      `json:"type"`
 	Status          int      `json:"status"`
-	DueDate         int64    `json:"due_date"`
+	DueDate         int      `json:"due_date"`
 	VipPayType      int      `json:"vip_pay_type"`
 	ThemeType       int      `json:"theme_type"`
 	Label           VipLabel `json:"label"`

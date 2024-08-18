@@ -166,7 +166,7 @@ type CollectionItemObj struct {
 	Type      int               `json:"type"`      // 收藏夹属性: 0表示普通收藏夹, 1表示默认收藏夹
 	Published int               `json:"published"` // 是否公开: 0表示不公开, 1表示公开
 	Cover     string            `json:"cover"`     // 歌单封面图片url
-	Ctime     int64             `json:"ctime"`     // 歌单创建时间, 时间戳
+	Ctime     int               `json:"ctime"`     // 歌单创建时间, 时间戳
 	Song      int               `json:"song"`      // 歌单中的音乐数量
 	Desc      string            `json:"desc"`      // 歌单备注信息
 	Sids      []int             `json:"sids"`      // 歌单中的音乐列表
@@ -200,7 +200,7 @@ type CollectionInfoData struct {
 	Type      int                 `json:"type"`      // 恒为1
 	Published int                 `json:"published"` // 是否公开: 0表示不公开, 1表示公开
 	Cover     string              `json:"cover"`     // 歌单封面图片url
-	Ctime     int64               `json:"ctime"`     // 歌单创建时间, 时间戳
+	Ctime     int                 `json:"ctime"`     // 歌单创建时间, 时间戳
 	Song      int                 `json:"song"`      // 歌单中的音乐数量
 	Desc      string              `json:"desc"`      // 空, 恒为空
 	Sids      []int               `json:"sids"`      // 歌单中的音乐, 按照歌单顺序排列的音频auid数组
@@ -243,8 +243,8 @@ type PlaylistInfo struct {
 	Intro     string            `json:"intro"`     // 歌单介绍
 	Type      int               `json:"type"`      // 歌单属性: 1为普通歌单, 2为置顶歌单, 5为PGC歌单
 	Off       int               `json:"off"`       // 歌单是否公开: 0为公开, 1为私密
-	Ctime     int64             `json:"ctime"`     // 歌单创建时间, 时间戳
-	Curtime   int64             `json:"curtime"`   // 当前时间, 时间戳
+	Ctime     int               `json:"ctime"`     // 歌单创建时间, 时间戳
+	Curtime   int               `json:"curtime"`   // 当前时间, 时间戳
 	Statistic PlaylistStatistic `json:"statistic"` // 歌单状态数信息
 	Snum      int               `json:"snum"`      // 歌单包含歌曲个数
 }
@@ -284,8 +284,8 @@ type RankInfo struct {
 	Intro     string        `json:"intro"`     // 歌单介绍
 	Type      int           `json:"type"`      // 歌单属性: 1为普通歌单, 2为置顶歌单, 5为PGC歌单
 	Off       int           `json:"off"`       // 歌单是否公开: 0为公开, 1为私密
-	Ctime     int64         `json:"ctime"`     // 歌单创建时间, 时间戳
-	Curtime   int64         `json:"curtime"`   // 当前时间, 时间戳
+	Ctime     int           `json:"ctime"`     // 歌单创建时间, 时间戳
+	Curtime   int           `json:"curtime"`   // 当前时间, 时间戳
 	Statistic RankStatistic `json:"statistic"` // 歌单状态数信息
 	Snum      int           `json:"snum"`      // 歌单包含歌曲个数
 	Audios    []AudioInfo   `json:"audios"`    // 歌单中的音乐信息(部分)

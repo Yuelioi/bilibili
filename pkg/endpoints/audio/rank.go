@@ -159,9 +159,9 @@ type TopListData struct {
 
 // TopListEntry represents the information of a specific top list entry.
 type TopListEntry struct {
-	ID          int   `json:"ID"`           // 榜单ID
-	Period      int   `json:"priod"`        // 榜单期数
-	PublishTime int64 `json:"publish_time"` // 发布时间, 秒时间戳
+	ID          int `json:"ID"`           // 榜单ID
+	Period      int `json:"priod"`        // 榜单期数
+	PublishTime int `json:"publish_time"` // 发布时间, 秒时间戳
 }
 
 //--

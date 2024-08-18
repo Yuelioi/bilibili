@@ -34,9 +34,9 @@ func (v *Video) OnlineTotal(aid int, bvid string, cid int) (*OnlineTotalResponse
 //   - aid (int): 视频的aid
 //   - appkey (string): APP密钥
 //   - cid (int): 视频的cid
-//   - ts (int64): 当前时间戳
+//   - ts (int): 当前时间戳
 //   - sign (string): APP签名
-func (v *Video) AppOnlineTotal(aid int, appkey string, cid int, ts int64, sign string) (*AppOnlineTotalResponse, error) {
+func (v *Video) AppOnlineTotal(aid int, appkey string, cid int, ts int, sign string) (*AppOnlineTotalResponse, error) {
 	baseURL := "https://app.bilibili.com/x/v2/view/video/online"
 
 	formData := map[string]string{

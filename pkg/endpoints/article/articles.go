@@ -55,9 +55,9 @@ type List struct {
 	MID         int    `json:"mid"`            // 文集作者mid
 	Name        string `json:"name"`           // 文集名称
 	ImageURL    string `json:"image_url"`      // 文集封面图片url
-	UpdateTime  int64  `json:"update_time"`    // 文集更新时间，时间戳
-	CTime       int64  `json:"ctime"`          // 文集创建时间，时间戳
-	PublishTime int64  `json:"publish_time"`   // 文集发布时间，时间戳
+	UpdateTime  int    `json:"update_time"`    // 文集更新时间，时间戳
+	CTime       int    `json:"ctime"`          // 文集创建时间，时间戳
+	PublishTime int    `json:"publish_time"`   // 文集发布时间，时间戳
 	Summary     string `json:"summary"`        // 文集简介
 	Words       int    `json:"words"`          // 文集字数
 	Read        int    `json:"read"`           // 文集阅读量
@@ -72,7 +72,7 @@ type ArticleOne struct {
 	ID          int        `json:"id"`           // 专栏cvid
 	Title       string     `json:"title"`        // 文章标题
 	State       int        `json:"state"`        // 作用尚不明确
-	PublishTime int64      `json:"publish_time"` // 发布时间，秒时间戳
+	PublishTime int        `json:"publish_time"` // 发布时间，秒时间戳
 	Words       int        `json:"words"`        // 文章字数
 	ImageURLs   []string   `json:"image_urls"`   // 文章封面
 	Category    Category   `json:"category"`     // 文章标签
@@ -121,7 +121,7 @@ type Nameplate struct {
 	Condition  string `json:"condition"`
 }
 type VIP struct {
-	Type       int   `json:"type"`        // 大会员类型
-	Status     int   `json:"status"`      // 大会员状态
-	ExpireTime int64 `json:"expire_time"` // 大会员到期时间
+	Type       int `json:"type"`        // 大会员类型
+	Status     int `json:"status"`      // 大会员状态
+	ExpireTime int `json:"expire_time"` // 大会员到期时间
 }

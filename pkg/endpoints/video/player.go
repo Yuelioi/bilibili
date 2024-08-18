@@ -8,8 +8,8 @@ import "fmt"
 //   - bvid (string): 视频的 bvid (可选)
 //   - cid (int): 视频的 cid (必要)
 //   - wRid (string): WBI 签名 (可选)
-//   - wts (int64): 当前 unix 时间戳 (可选)
-func (v *Video) GetWebPlayerInfo(aid int, bvid string, cid int, wRid string, wts int64) (*WebPlayerInfoResponse, error) {
+//   - wts (int): 当前 unix 时间戳 (可选)
+func (v *Video) GetWebPlayerInfo(aid int, bvid string, cid int, wRid string, wts int) (*WebPlayerInfoResponse, error) {
 	baseURL := "https://api.bilibili.com/x/player/wbi/v2"
 
 	// Set query parameters based on provided values

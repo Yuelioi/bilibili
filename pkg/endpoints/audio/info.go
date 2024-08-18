@@ -132,8 +132,8 @@ type SongInfoData struct {
 	Lyric      string         `json:"lyric"`      // lrc歌词url
 	Crtype     int            `json:"crtype"`     // 作用尚不明确, 默认为1
 	Duration   int            `json:"duration"`   // 歌曲时间长度, 单位为秒
-	Passtime   int64          `json:"passtime"`   // 歌曲发布时间, 时间戳
-	Curtime    int64          `json:"curtime"`    // 当前请求时间, 时间戳
+	Passtime   int            `json:"passtime"`   // 歌曲发布时间, 时间戳
+	Curtime    int            `json:"curtime"`    // 当前请求时间, 时间戳
 	Aid        int            `json:"aid"`        // 关联稿件avid, 无为0
 	Bvid       string         `json:"bvid"`       // 关联稿件bvid, 无为空
 	Cid        int            `json:"cid"`        // 关联视频cid, 无为0
@@ -158,10 +158,10 @@ type SongStatistic struct {
 }
 
 type VipInfo struct {
-	Type       int   `json:"type"`         // 会员类型: 0表示无, 1表示月会员, 2表示年会员
-	Status     int   `json:"status"`       // 会员状态: 0表示无, 1表示有
-	DueDate    int64 `json:"due_date"`     // 会员到期时间, 时间戳 毫秒
-	VipPayType int   `json:"vip_pay_type"` // 会员开通状态: 0表示无, 1表示有
+	Type       int `json:"type"`         // 会员类型: 0表示无, 1表示月会员, 2表示年会员
+	Status     int `json:"status"`       // 会员状态: 0表示无, 1表示有
+	DueDate    int `json:"due_date"`     // 会员到期时间, 时间戳 毫秒
+	VipPayType int `json:"vip_pay_type"` // 会员开通状态: 0表示无, 1表示有
 }
 
 // ----------------------------------------
