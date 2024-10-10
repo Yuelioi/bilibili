@@ -226,14 +226,15 @@ type Stat struct {
 
 // Page represents a page of the video.
 type Page struct {
-	CID       int       `json:"cid"`       // 分P cid
-	Page      int       `json:"page"`      // 分P序号，从1开始
-	From      string    `json:"from"`      // 视频来源
-	Part      string    `json:"part"`      // 分P标题
-	Duration  int       `json:"duration"`  // 分P持续时间，单位为秒
-	VID       string    `json:"vid"`       // 站外视频vid，仅站外视频有效
-	Weblink   string    `json:"weblink"`   // 站外视频跳转url，仅站外视频有效
-	Dimension Dimension `json:"dimension"` // 当前分P分辨率
+	CID        int       `json:"cid"`         // 分P cid
+	Page       int       `json:"page"`        // 分P序号，从1开始
+	From       string    `json:"from"`        // 视频来源
+	Part       string    `json:"part"`        // 分P标题
+	Duration   int       `json:"duration"`    // 分P持续时间，单位为秒
+	VID        string    `json:"vid"`         // 站外视频vid，仅站外视频有效
+	Weblink    string    `json:"weblink"`     // 站外视频跳转url，仅站外视频有效
+	Dimension  Dimension `json:"dimension"`   // 当前分P分辨率
+	FirstFrame string    `json:"first_frame"` // 封面图
 }
 
 // Dimension represents the dimension of a video page.
